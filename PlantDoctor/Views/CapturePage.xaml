@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="PlantDoctor.Views.CapturePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Scan Plant"
+    Shell.NavBarIsVisible="True"
+    Shell.BackButtonBehavior="{StaticResource DefaultBackButton}">
+
+    <Shell.TitleView>
+        <Label
+            FontAttributes="Bold"
+            FontSize="20"
+            HorizontalOptions="Center"
+            Text="Scan Plant"
+            TextColor="{StaticResource PrimaryGreenDark}"
+            VerticalOptions="Center" />
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,20,24,40" Spacing="24">
+
+            <!-- Image preview area -->
+            <Border Style="{StaticResource CardFrame}" HeightRequest="280">
+                <Grid>
+
+                    <!-- Placeholder when no image selected -->
+                    <VerticalStackLayout
+                        x:Name="PlaceholderLayout"
+                        HorizontalOptions="Center"
+                        Spacing="16"
+                        VerticalOptions="Center">
+                        <Border
+                            BackgroundColor="#E8F5E9"
+                            HeightRequest="80"
+                            HorizontalOptions="Center"
+                            StrokeThickness="0"
+                            WidthRequest="80">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="40" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="36"
+                                HorizontalOptions="Center"
+                                Text="🍃"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            HorizontalOptions="Center"
+                            Text="No image selected"
+                            TextColor="{StaticResource TextDark}" />
+                        <Label
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Text="Take a photo or choose from gallery&#10;to detect plant disease"
+                            TextColor="{StaticResource TextMuted}" />
+                    </VerticalStackLayout>
+
+                    <!-- Selected image preview -->
+                    <Image
+                        x:Name="SelectedImage"
+                        Aspect="AspectFill"
+                        HorizontalOptions="Fill"
+                        IsVisible="False"
+                        VerticalOptions="Fill" />
+
+                    <!-- Re-select overlay (visible only when image is selected) -->
+                    <Border
+                        x:Name="ReSelectOverlay"
+                        BackgroundColor="#44000000"
+                        HorizontalOptions="End"
+                        IsVisible="False"
+                        Margin="8"
+                        Padding="8,4"
+                        StrokeThickness="0"
+                        VerticalOptions="Start">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnClearImageTapped" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            FontSize="12"
+                            Text="✕ Clear"
+                            TextColor="White" />
+                    </Border>
+
+                </Grid>
+            </Border>
+
+            <!-- Image source buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                <Button
+                    Grid.Column="0"
+                    Clicked="OnCameraTapped"
+                    Style="{StaticResource PrimaryButton}"
+                    Text="📷  Camera" />
+
+                <Button
+                    Grid.Column="1"
+                    Clicked="OnGalleryTapped"
+                    Style="{StaticResource SecondaryButton}"
+                    Text="🖼  Gallery" />
+
+            </Grid>
+
+            <!-- Tips card -->
+            <Border Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        Text="📌 Tips for best results"
+                        TextColor="{StaticResource TextDark}" />
+                    <BoxView
+                        BackgroundColor="{StaticResource BorderLight}"
+                        HeightRequest="1" />
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="✅" FontSize="13" VerticalOptions="Start"/>
+                        <Label
+                            FontSize="13"
+                            Text="Focus clearly on the affected leaf"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="✅" FontSize="13" VerticalOptions="Start"/>
+                        <Label
+                            FontSize="13"
+                            Text="Use natural daylight for better accuracy"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="✅" FontSize="13" VerticalOptions="Start"/>
+                        <Label
+                            FontSize="13"
+                            Text="Avoid blurry or dark images"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="✅" FontSize="13" VerticalOptions="Start"/>
+                        <Label
+                            FontSize="13"
+                            Text="Capture one leaf at a time"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Connectivity status badge -->
+            <Border
+                x:Name="ConnectivityBadge"
+                Padding="14,10"
+                StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                    <Label
+                        x:Name="ConnectivityIcon"
+                        FontSize="14"
+                        Text="🟢"
+                        VerticalOptions="Center" />
+                    <Label
+                        x:Name="ConnectivityLabel"
+                        FontSize="13"
+                        TextColor="{StaticResource PrimaryGreenDark}"
+                        VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Analyse button -->
+            <Button
+                x:Name="AnalyseButton"
+                Clicked="OnAnalyseTapped"
+                IsEnabled="False"
+                Style="{StaticResource PrimaryButton}"
+                Text="🔍  Analyse Plant"
+                Opacity="0.5" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="PlantDoctor.Views.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title=""
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- ===== HERO SECTION ===== -->
+            <Grid HeightRequest="320">
+                <Grid.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#1B5E20" Offset="0.0" />
+                        <GradientStop Color="#2E7D32" Offset="0.5" />
+                        <GradientStop Color="#43A047" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Grid.Background>
+
+                <VerticalStackLayout
+                    Padding="30,50,30,30"
+                    Spacing="12"
+                    VerticalOptions="Center">
+
+                    <!-- Icon -->
+                    <Border
+                        BackgroundColor="#33FFFFFF"
+                        HeightRequest="80"
+                        HorizontalOptions="Center"
+                        StrokeThickness="0"
+                        WidthRequest="80">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="24" />
+                        </Border.StrokeShape>
+                        <Label
+                            FontSize="40"
+                            HorizontalOptions="Center"
+                            Text="🌿"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- App name -->
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="34"
+                        HorizontalOptions="Center"
+                        Text="PlantDoctor"
+                        TextColor="White" />
+
+                    <!-- Tagline -->
+                    <Label
+                        FontSize="15"
+                        HorizontalOptions="Center"
+                        Opacity="0.85"
+                        Text="AI-powered plant disease detection"
+                        TextColor="White" />
+
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- ===== MAIN CONTENT ===== -->
+            <VerticalStackLayout Padding="24,28,24,40" Spacing="24">
+
+                <!-- Quick stats bar -->
+                <Border Style="{StaticResource CardFrame}">
+                    <Grid ColumnDefinitions="*,1,*,1,*">
+
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="4">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                HorizontalOptions="Center"
+                                Text="15"
+                                TextColor="{StaticResource PrimaryGreen}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="Diseases"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+
+                        <BoxView
+                            Grid.Column="1"
+                            BackgroundColor="{StaticResource BorderLight}"
+                            WidthRequest="1" />
+
+                        <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="4">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                HorizontalOptions="Center"
+                                Text="3"
+                                TextColor="{StaticResource PrimaryGreen}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="Crops"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+
+                        <BoxView
+                            Grid.Column="3"
+                            BackgroundColor="{StaticResource BorderLight}"
+                            WidthRequest="1" />
+
+                        <VerticalStackLayout Grid.Column="4" HorizontalOptions="Center" Spacing="4">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                HorizontalOptions="Center"
+                                Text="85%+"
+                                TextColor="{StaticResource PrimaryGreen}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="Accuracy"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+
+                    </Grid>
+                </Border>
+
+                <!-- Section label -->
+                <Label
+                    Style="{StaticResource SectionHeading}"
+                    Text="Get Started" />
+
+                <!-- Scan Plant Card -->
+                <Border Style="{StaticResource CardFrame}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnScanTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="64,*,Auto" ColumnSpacing="16">
+
+                        <Border
+                            BackgroundColor="#E8F5E9"
+                            HeightRequest="56"
+                            StrokeThickness="0"
+                            WidthRequest="56">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="26"
+                                HorizontalOptions="Center"
+                                Text="📷"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="16"
+                                Text="Scan Plant"
+                                TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                            <Label
+                                FontSize="13"
+                                Text="Take or upload a leaf photo for instant diagnosis"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+
+                        <Label
+                            Grid.Column="2"
+                            FontSize="20"
+                            Text="›"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+
+                    </Grid>
+                </Border>
+
+                <!-- View History Card -->
+                <Border Style="{StaticResource CardFrame}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnHistoryTapped" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="64,*,Auto" ColumnSpacing="16">
+
+                        <Border
+                            BackgroundColor="#FFF8E1"
+                            HeightRequest="56"
+                            StrokeThickness="0"
+                            WidthRequest="56">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16" />
+                            </Border.StrokeShape>
+                            <Label
+                                FontSize="26"
+                                HorizontalOptions="Center"
+                                Text="📋"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="16"
+                                Text="View History"
+                                TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                            <Label
+                                FontSize="13"
+                                Text="Review your previous plant diagnoses"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+
+                        <Label
+                            Grid.Column="2"
+                            FontSize="20"
+                            Text="›"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center" />
+
+                    </Grid>
+                </Border>
+
+                <!-- Supported crops section -->
+                <Label
+                    Style="{StaticResource SectionHeading}"
+                    Text="Supported Crops" />
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+
+                    <!-- Tomato -->
+                    <Border Grid.Column="0" Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout HorizontalOptions="Center" Spacing="6">
+                            <Label
+                                FontSize="28"
+                                HorizontalOptions="Center"
+                                Text="🍅" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="Tomato"
+                                TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="9 diseases"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Potato -->
+                    <Border Grid.Column="1" Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout HorizontalOptions="Center" Spacing="6">
+                            <Label
+                                FontSize="28"
+                                HorizontalOptions="Center"
+                                Text="🥔" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="Potato"
+                                TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="2 diseases"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Pepper -->
+                    <Border Grid.Column="2" Style="{StaticResource CardFrame}">
+                        <VerticalStackLayout HorizontalOptions="Center" Spacing="6">
+                            <Label
+                                FontSize="28"
+                                HorizontalOptions="Center"
+                                Text="🫑" />
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                HorizontalOptions="Center"
+                                Text="Pepper"
+                                TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                            <Label
+                                FontSize="11"
+                                HorizontalOptions="Center"
+                                Text="1 disease"
+                                TextColor="{StaticResource TextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </Grid>
+
+                <!-- Offline badge -->
+                <Border
+                    BackgroundColor="#E8F5E9"
+                    Padding="16,12"
+                    StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                        <Label
+                            FontSize="16"
+                            Text="⚡"
+                            VerticalOptions="Center" />
+                        <Label
+                            FontSize="13"
+                            Text="Works offline — no internet required for basic diagnosis"
+                            TextColor="{StaticResource PrimaryGreenDark}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

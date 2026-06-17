@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="PlantDoctor.Views.ResultPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Diagnosis Result"
+    Shell.NavBarIsVisible="True">
+
+    <Shell.TitleView>
+        <Label
+            FontAttributes="Bold"
+            FontSize="20"
+            HorizontalOptions="Center"
+            Text="Diagnosis Result"
+            TextColor="{StaticResource PrimaryGreenDark}"
+            VerticalOptions="Center" />
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,20,24,40" Spacing="20">
+
+            <!-- Scanned image -->
+            <Border Style="{StaticResource CardFrame}" HeightRequest="220">
+                <Image
+                    x:Name="ScannedImage"
+                    Aspect="AspectFill"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill" />
+            </Border>
+
+            <!-- Diagnosis badge -->
+            <Border
+                x:Name="DiagnosisBadge"
+                Padding="20,16"
+                StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+
+                    <Label
+                        x:Name="SeverityIcon"
+                        FontSize="32"
+                        Grid.Column="0"
+                        VerticalOptions="Center" />
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label
+                            x:Name="CropLabel"
+                            FontSize="13"
+                            Opacity="0.75"
+                            TextColor="White" />
+                        <Label
+                            x:Name="DiseaseNameLabel"
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            TextColor="White" />
+                        <Label
+                            x:Name="SeverityLabel"
+                            FontSize="13"
+                            Opacity="0.85"
+                            TextColor="White" />
+                    </VerticalStackLayout>
+
+                    <!-- Confidence ring -->
+                    <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="2" VerticalOptions="Center">
+                        <Label
+                            x:Name="ConfidenceLabel"
+                            FontAttributes="Bold"
+                            FontSize="22"
+                            HorizontalOptions="Center"
+                            TextColor="White" />
+                        <Label
+                            FontSize="11"
+                            HorizontalOptions="Center"
+                            Opacity="0.8"
+                            Text="confidence"
+                            TextColor="White" />
+                    </VerticalStackLayout>
+
+                </Grid>
+            </Border>
+
+            <!-- Inference info strip -->
+            <Border Style="{StaticResource CardFrame}" Padding="14,10">
+                <Grid ColumnDefinitions="*,1,*" ColumnSpacing="0">
+                    <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="6">
+                        <Label x:Name="ModeIcon" FontSize="14" VerticalOptions="Center" />
+                        <Label x:Name="ModeLabel" FontSize="13"
+                               TextColor="{StaticResource TextMuted}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <BoxView Grid.Column="1" BackgroundColor="{StaticResource BorderLight}" WidthRequest="1" />
+                    <HorizontalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="6">
+                        <Label Text="⚡" FontSize="14" VerticalOptions="Center" />
+                        <Label x:Name="SpeedLabel" FontSize="13"
+                               TextColor="{StaticResource TextMuted}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Description -->
+            <Border Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        Text="📋 About this condition"
+                        TextColor="{StaticResource TextDark}" />
+                    <BoxView BackgroundColor="{StaticResource BorderLight}" HeightRequest="1" />
+                    <Label
+                        x:Name="DescriptionLabel"
+                        FontSize="14"
+                        LineHeight="1.5"
+                        TextColor="{StaticResource TextMuted}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Symptoms -->
+            <Border Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        Text="🔍 Symptoms"
+                        TextColor="{StaticResource TextDark}" />
+                    <BoxView BackgroundColor="{StaticResource BorderLight}" HeightRequest="1" />
+                    <Label
+                        x:Name="SymptomsLabel"
+                        FontSize="14"
+                        LineHeight="1.5"
+                        TextColor="{StaticResource TextMuted}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Treatment section (hidden if healthy) -->
+            <VerticalStackLayout x:Name="TreatmentSection" Spacing="16">
+
+                <!-- Chemical treatment -->
+                <Border Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="15"
+                            Text="💊 Chemical Treatment"
+                            TextColor="{StaticResource TextDark}" />
+                        <BoxView BackgroundColor="{StaticResource BorderLight}" HeightRequest="1" />
+                        <Label
+                            x:Name="ChemicalLabel"
+                            FontSize="14"
+                            LineHeight="1.5"
+                            TextColor="{StaticResource TextMuted}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Organic treatment -->
+                <Border Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="15"
+                            Text="🌱 Organic Treatment"
+                            TextColor="{StaticResource TextDark}" />
+                        <BoxView BackgroundColor="{StaticResource BorderLight}" HeightRequest="1" />
+                        <Label
+                            x:Name="OrganicLabel"
+                            FontSize="14"
+                            LineHeight="1.5"
+                            TextColor="{StaticResource TextMuted}" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- Preventive measures -->
+            <Border Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="10">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        Text="🛡️ Preventive Measures"
+                        TextColor="{StaticResource TextDark}" />
+                    <BoxView BackgroundColor="{StaticResource BorderLight}" HeightRequest="1" />
+                    <Label
+                        x:Name="PreventiveLabel"
+                        FontSize="14"
+                        LineHeight="1.5"
+                        TextColor="{StaticResource TextMuted}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Action buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button
+                    Grid.Column="0"
+                    Clicked="OnScanAnotherTapped"
+                    Style="{StaticResource SecondaryButton}"
+                    Text="🔄  Scan Another" />
+                <Button
+                    Grid.Column="1"
+                    Clicked="OnViewHistoryTapped"
+                    Style="{StaticResource PrimaryButton}"
+                    Text="📋  History" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
