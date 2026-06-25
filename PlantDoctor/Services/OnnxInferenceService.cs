@@ -1,40 +1,41 @@
-﻿using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using PlantDoctor.Models;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 
 namespace PlantDoctor.Services
 {
-    public class OnnxInferenceService : IInferenceService
+    public class OnnxInferenceService : IInferenceService   // ← was : InferenceCoordinator
     {
         private InferenceSession? _session;
         private bool _isInitialized = false;
 
-        // Exact alphabetical order of PlantVillage folders
+        // Synchronized with class_labels.json from trained model
+        // Order = alphabetical folder sort by image_dataset_from_directory
         private static readonly string[] Labels = new[]
         {
-            "Pepper__bell___Bacterial_spot",       // 0
-            "Pepper__bell___healthy",              // 1
-            "Potato___Early_blight",               // 2
-            "Potato___Late_blight",                // 3
-            "Potato___healthy",                    // 4
-            "Tomato_Bacterial_spot",               // 5
-            "Tomato_Early_blight",                 // 6
-            "Tomato_Late_blight",                  // 7
-            "Tomato_Leaf_Mold",                    // 8
-            "Tomato_Septoria_leaf_spot",           // 9
-            "Tomato_Spider_mites_Two_spotted_spider_mite", // 10
-            "Tomato_Target_Spot",                  // 11
-            "Tomato_Yellow_Leaf_Curl_Virus",       // 12
-            "Tomato_healthy",                      // 13
-            "Tomato_mosaic_virus"                  // 14
+            "Pepper__bell___Bacterial_spot",                    // 0
+            "Pepper__bell___healthy",                           // 1
+            "Potato___Early_blight",                            // 2
+            "Potato___Late_blight",                             // 3
+            "Potato___healthy",                                 // 4
+            "Tomato_Bacterial_spot",                            // 5
+            "Tomato_Early_blight",                              // 6
+            "Tomato_Late_blight",                               // 7
+            "Tomato_Leaf_Mold",                                 // 8
+            "Tomato_Septoria_leaf_spot",                        // 9
+            "Tomato_Spider_mites_Two_spotted_spider_mite",      // 10
+            "Tomato__Target_Spot",                              // 11
+            "Tomato__Tomato_YellowLeaf__Curl_Virus",            // 12
+            "Tomato__Tomato_mosaic_virus",                      // 13
+            "Tomato_healthy"                                    // 14
         };
 
         private async Task InitializeAsync()
         {
             if (_isInitialized) return;
 
-            // Copy ONNX model from MauiAsset to writable storage on first run
             var modelPath = Path.Combine(FileSystem.AppDataDirectory, "plant_disease_model.onnx");
 
             if (!File.Exists(modelPath))
@@ -48,6 +49,14 @@ namespace PlantDoctor.Services
             options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
             _session = new InferenceSession(modelPath, options);
             _isInitialized = true;
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Model loaded from: {modelPath}");
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Input: {string.Join(", ", _session.InputMetadata.Keys)}");
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Output: {string.Join(", ", _session.OutputMetadata.Keys)}");
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Input shape: [{string.Join(", ", _session.InputMetadata.First().Value.Dimensions)}]");
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Output shape: [{string.Join(", ", _session.OutputMetadata.First().Value.Dimensions)}]");
+#endif
         }
 
         public async Task<PredictionResult> PredictAsync(string imagePath)
@@ -56,10 +65,8 @@ namespace PlantDoctor.Services
 
             var stopwatch = Stopwatch.StartNew();
 
-            // Step 1 — Load and resize image to 224x224
             var inputTensor = await PreprocessImageAsync(imagePath);
 
-            // Step 2 — Run inference
             var inputs = new List<NamedOnnxValue>
             {
                 NamedOnnxValue.CreateFromTensor(
@@ -73,14 +80,27 @@ namespace PlantDoctor.Services
                 outputScores = results.First().AsEnumerable<float>().ToArray();
             }
 
-            // Step 3 — Apply softmax (model uses from_logits=True)
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"[ONNX] Raw output scores ({outputScores.Length} values): [{string.Join(", ", outputScores.Select(s => s.ToString("F3")))}]");
+#endif
+
+            // Apply softmax — model uses from_logits=True
             var probabilities = Softmax(outputScores);
 
-            // Step 4 — Get top prediction
             var maxIndex = probabilities
                 .Select((p, i) => (p, i))
                 .OrderByDescending(x => x.p)
                 .First().i;
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine("=== PREDICTION DEBUG ===");
+            for (int i = 0; i < probabilities.Length; i++)
+            {
+                var marker = i == maxIndex ? " ◄ TOP" : "";
+                System.Diagnostics.Debug.WriteLine($"  [{i:D2}] {Labels[i],-52}: {probabilities[i]:P2}{marker}");
+            }
+            System.Diagnostics.Debug.WriteLine($"=== RESULT: index={maxIndex}, label={Labels[maxIndex]}, confidence={probabilities[maxIndex]:P2} ===");
+#endif
 
             stopwatch.Stop();
 
@@ -96,27 +116,22 @@ namespace PlantDoctor.Services
 
         private async Task<DenseTensor<float>> PreprocessImageAsync(string imagePath)
         {
-            // Load image bytes
             byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
-
-            // Decode and resize to 224x224 using MAUI's built-in image handling
-            var tensor = new DenseTensor<float>(new[] { 1, 224, 224, 3 }); // NHWC format
+            var tensor = new DenseTensor<float>(new[] { 1, 224, 224, 3 });
 
             await Task.Run(() =>
             {
-                // Decode image manually using raw pixel data
                 using var ms = new MemoryStream(imageBytes);
                 var pixels = DecodeAndResizeImage(ms, 224, 224);
 
-                // Fill tensor — values 0-255 (model has internal Rescaling layer)
                 for (int y = 0; y < 224; y++)
                 {
                     for (int x = 0; x < 224; x++)
                     {
                         int pixelIndex = (y * 224 + x) * 3;
-                        tensor[0, y, x, 0] = pixels[pixelIndex];     // R
-                        tensor[0, y, x, 1] = pixels[pixelIndex + 1]; // G
-                        tensor[0, y, x, 2] = pixels[pixelIndex + 2]; // B
+                        tensor[0, y, x, 0] = pixels[pixelIndex];
+                        tensor[0, y, x, 1] = pixels[pixelIndex + 1];
+                        tensor[0, y, x, 2] = pixels[pixelIndex + 2];
                     }
                 }
             });
@@ -126,7 +141,6 @@ namespace PlantDoctor.Services
 
         private float[] DecodeAndResizeImage(Stream imageStream, int width, int height)
         {
-            // Read all bytes
             byte[] imageBytes;
             using (var ms = new MemoryStream())
             {
@@ -134,11 +148,10 @@ namespace PlantDoctor.Services
                 imageBytes = ms.ToArray();
             }
 
-            // Use SkiaSharp for reliable cross-platform image decoding
             using var skBitmap = SkiaSharp.SKBitmap.Decode(imageBytes);
             using var resized = skBitmap.Resize(
                 new SkiaSharp.SKImageInfo(width, height),
-                SkiaSharp.SKFilterQuality.High);
+                SkiaSharp.SKSamplingOptions.Default);
 
             float[] pixels = new float[width * height * 3];
             int index = 0;

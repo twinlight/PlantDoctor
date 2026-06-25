@@ -1,4 +1,4 @@
-﻿using PlantDoctor.Models;
+using PlantDoctor.Models;
 using SQLite;
 
 namespace PlantDoctor.Services
@@ -6,6 +6,10 @@ namespace PlantDoctor.Services
     public class DatabaseService
     {
         private SQLiteAsyncConnection? _db;
+
+        // Bump this version number any time seed data changes
+        // App checks this and re-seeds if version doesn't match
+        private const int CurrentDbVersion = 3;
 
         private async Task InitAsync()
         {
@@ -16,14 +20,32 @@ namespace PlantDoctor.Services
 
             await _db.CreateTableAsync<DiseaseInfo>();
             await _db.CreateTableAsync<ScanHistory>();
+            await _db.CreateTableAsync<DbMeta>();
 
-            // Seed disease data if empty
-            var count = await _db.Table<DiseaseInfo>().CountAsync();
-            if (count == 0)
+            // Check version — re-seed if outdated or missing
+            var meta = await _db.Table<DbMeta>().FirstOrDefaultAsync();
+            if (meta == null || meta.Version < CurrentDbVersion)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"[DB] Version mismatch (found={meta?.Version}, required={CurrentDbVersion}). Re-seeding...");
+#endif
+                await _db.DeleteAllAsync<DiseaseInfo>();
                 await SeedDiseaseDataAsync();
+
+                if (meta == null)
+                    await _db.InsertAsync(new DbMeta { Id = 1, Version = CurrentDbVersion });
+                else
+                {
+                    meta.Version = CurrentDbVersion;
+                    await _db.UpdateAsync(meta);
+                }
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine("[DB] Re-seed complete.");
+#endif
+            }
         }
 
-        // ── Scan History ──────────────────────────────────────────
+        // ── Scan History ──────────────────────────────────────────────────────
         public async Task SaveScanAsync(ScanHistory scan)
         {
             await InitAsync();
@@ -50,16 +72,32 @@ namespace PlantDoctor.Services
             await _db!.DeleteAllAsync<ScanHistory>();
         }
 
-        // ── Disease Info ──────────────────────────────────────────
+        // ── Disease Info ──────────────────────────────────────────────────────
         public async Task<DiseaseInfo?> GetDiseaseInfoAsync(int classIndex)
         {
             await InitAsync();
-            return await _db!.Table<DiseaseInfo>()
+            var result = await _db!.Table<DiseaseInfo>()
                 .Where(d => d.ClassIndex == classIndex)
                 .FirstOrDefaultAsync();
+
+#if DEBUG
+            if (result == null)
+                System.Diagnostics.Debug.WriteLine($"[DB] WARNING: No DiseaseInfo found for ClassIndex={classIndex}");
+            else
+                System.Diagnostics.Debug.WriteLine($"[DB] Found: ClassIndex={classIndex} → {result.DisplayName} ({result.CropName})");
+#endif
+            return result;
         }
 
-        // ── Seed Data ─────────────────────────────────────────────
+        // ── Seed Data ─────────────────────────────────────────────────────────
+        // ClassIndex values MUST match class_labels.json from trained model:
+        // 0=Pepper__bell___Bacterial_spot, 1=Pepper__bell___healthy,
+        // 2=Potato___Early_blight, 3=Potato___Late_blight, 4=Potato___healthy,
+        // 5=Tomato_Bacterial_spot, 6=Tomato_Early_blight, 7=Tomato_Late_blight,
+        // 8=Tomato_Leaf_Mold, 9=Tomato_Septoria_leaf_spot,
+        // 10=Tomato_Spider_mites_Two_spotted_spider_mite,
+        // 11=Tomato__Target_Spot, 12=Tomato__Tomato_YellowLeaf__Curl_Virus,
+        // 13=Tomato__Tomato_mosaic_virus, 14=Tomato_healthy
         private async Task SeedDiseaseDataAsync()
         {
             var diseases = new List<DiseaseInfo>
@@ -221,7 +259,7 @@ namespace PlantDoctor.Services
                 new DiseaseInfo
                 {
                     ClassIndex = 11,
-                    ClassName = "Tomato_Target_Spot",
+                    ClassName = "Tomato__Target_Spot",
                     CropName = "Tomato",
                     DisplayName = "Target Spot",
                     Severity = "Moderate",
@@ -235,7 +273,7 @@ namespace PlantDoctor.Services
                 new DiseaseInfo
                 {
                     ClassIndex = 12,
-                    ClassName = "Tomato_Yellow_Leaf_Curl_Virus",
+                    ClassName = "Tomato__Tomato_YellowLeaf__Curl_Virus",
                     CropName = "Tomato",
                     DisplayName = "Yellow Leaf Curl Virus",
                     Severity = "Severe",
@@ -249,6 +287,20 @@ namespace PlantDoctor.Services
                 new DiseaseInfo
                 {
                     ClassIndex = 13,
+                    ClassName = "Tomato__Tomato_mosaic_virus",
+                    CropName = "Tomato",
+                    DisplayName = "Mosaic Virus",
+                    Severity = "Severe",
+                    ColorHex = "#E53935",
+                    Description = "Tomato Mosaic Virus (ToMV) spreads through contact with infected plant sap, contaminated tools, and hands. It can persist in soil and plant debris for years.",
+                    Symptoms = "Mottled light and dark green mosaic pattern on leaves. Leaves may be distorted, curled, or reduced in size. Stunted plant growth. Fruit may show yellow mottling and internal browning.",
+                    ChemicalTreatment = "No chemical cure for viral infections. Remove and destroy infected plants immediately. Disinfect tools with 10% bleach or 70% alcohol solution between plants.",
+                    OrganicTreatment = "No organic cure available. Prevention is the only management strategy. Remove infected plants and wash hands thoroughly after handling.",
+                    PreventiveMeasures = "Use certified virus-free seeds and transplants. Wash hands thoroughly before handling plants. Disinfect tools regularly. Control aphid populations which can spread related viruses. Do not smoke near plants as tobacco can harbor mosaic virus."
+                },
+                new DiseaseInfo
+                {
+                    ClassIndex = 14,
                     ClassName = "Tomato_healthy",
                     CropName = "Tomato",
                     DisplayName = "Healthy",
@@ -259,24 +311,16 @@ namespace PlantDoctor.Services
                     ChemicalTreatment = "No treatment required.",
                     OrganicTreatment = "Continue regular balanced fertilization. Apply compost tea as a foliar spray to boost natural immunity.",
                     PreventiveMeasures = "Water at the base in the morning. Stake plants for support. Scout weekly for early pest and disease signs. Maintain good soil drainage."
-                },
-                new DiseaseInfo
-                {
-                    ClassIndex = 14,
-                    ClassName = "Tomato_mosaic_virus",
-                    CropName = "Tomato",
-                    DisplayName = "Mosaic Virus",
-                    Severity = "Severe",
-                    ColorHex = "#E53935",
-                    Description = "Tomato Mosaic Virus (ToMV) spreads through contact with infected plant sap, contaminated tools, and hands. It can persist in soil and plant debris for years.",
-                    Symptoms = "Mottled light and dark green mosaic pattern on leaves. Leaves may be distorted, curled, or reduced in size. Stunted plant growth. Fruit may show yellow mottling and internal browning.",
-                    ChemicalTreatment = "No chemical cure for viral infections. Remove and destroy infected plants immediately. Disinfect tools with 10% bleach or 70% alcohol solution between plants.",
-                    OrganicTreatment = "No organic cure available. Prevention is the only management strategy. Remove infected plants and wash hands thoroughly after handling.",
-                    PreventiveMeasures = "Use certified virus-free seeds and transplants. Wash hands thoroughly before handling plants. Disinfect tools regularly. Control aphid populations which can spread related viruses. Do not smoke near plants as tobacco can harbor mosaic virus."
                 }
             };
 
             await _db!.InsertAllAsync(diseases);
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"[DB] Seeded {diseases.Count} disease records.");
+            foreach (var d in diseases)
+                System.Diagnostics.Debug.WriteLine($"  [{d.ClassIndex:D2}] {d.ClassName} → {d.DisplayName}");
+#endif
         }
     }
 }

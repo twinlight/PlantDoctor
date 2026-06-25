@@ -6,13 +6,13 @@ namespace PlantDoctor.Views
     public partial class CapturePage : ContentPage
     {
         private string? _selectedImagePath;
-        private readonly OnnxInferenceService _onnxService;
+        private readonly InferenceCoordinator _coordinator;     // ← changed
         private readonly DatabaseService _databaseService;
 
-        public CapturePage(OnnxInferenceService onnxService, DatabaseService databaseService)
+        public CapturePage(InferenceCoordinator coordinator, DatabaseService databaseService)
         {
             InitializeComponent();
-            _onnxService = onnxService;
+            _coordinator = coordinator;
             _databaseService = databaseService;
         }
 
@@ -104,19 +104,24 @@ namespace PlantDoctor.Views
         {
             if (_selectedImagePath == null) return;
 
-            // Show loading state
             AnalyseButton.Text = "⏳  Analysing...";
             AnalyseButton.IsEnabled = false;
 
             try
             {
-                // Run ONNX inference
-                var result = await _onnxService.PredictAsync(_selectedImagePath);
+                // Coordinator auto-picks online (FastAPI) or offline (ONNX)
+                var result = await _coordinator.PredictAsync(_selectedImagePath);
 
-                // Fetch disease info from database
-                result.DiseaseInfo = await _databaseService.GetDiseaseInfoAsync(result.ClassIndex);
+                // Confidence threshold
+                if (result.Confidence < 0.55f)
+                {
+                    await DisplayAlert(
+                        "📷 Cannot Identify",
+                        $"Confidence too low ({result.Confidence * 100:F0}%) to make a reliable diagnosis.\n\nPlease:\n• Ensure it is a plant leaf\n• Fill the frame with the leaf\n• Use natural daylight\n• Avoid blurry or dark images",
+                        "Try Again");
+                    return;
+                }
 
-                // Save to history
                 if (result.DiseaseInfo != null)
                 {
                     await _databaseService.SaveScanAsync(new ScanHistory
@@ -132,7 +137,6 @@ namespace PlantDoctor.Views
                     });
                 }
 
-                // Navigate to ResultPage passing the result
                 var parameters = new Dictionary<string, object>
                 {
                     { "Result", result },

@@ -23,10 +23,20 @@ namespace PlantDoctor
             builder.Services.AddSingleton<DatabaseService>();
             builder.Services.AddSingleton<ConnectivityService>();
             builder.Services.AddSingleton<OnnxInferenceService>();
+            builder.Services.AddSingleton<ApiInferenceService>();
+            builder.Services.AddSingleton<InferenceCoordinator>(sp => new InferenceCoordinator(
+                sp.GetRequiredService<OnnxInferenceService>(),
+                sp.GetRequiredService<ApiInferenceService>(),
+                sp.GetRequiredService<ConnectivityService>(),
+                sp.GetRequiredService<DatabaseService>()
+            ));
 
             // Views
             builder.Services.AddTransient<HomePage>();
-            builder.Services.AddTransient<CapturePage>();
+            builder.Services.AddTransient<CapturePage>(sp => new CapturePage(
+                sp.GetRequiredService<InferenceCoordinator>(),
+                sp.GetRequiredService<DatabaseService>()
+            ));
             builder.Services.AddTransient<ResultPage>();
             builder.Services.AddTransient<HistoryPage>();
 

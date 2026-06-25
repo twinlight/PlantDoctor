@@ -80,6 +80,25 @@
 
                 </Grid>
             </Border>
+            <!-- Moderate confidence warning -->
+            <Border
+    x:Name="ConfidenceWarningBorder"
+    BackgroundColor="#FFF8E1"
+    IsVisible="False"
+    Padding="14,10"
+    StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                    <Label FontSize="16" Text="⚠️" VerticalOptions="Center" />
+                    <Label
+            x:Name="ConfidenceWarningLabel"
+            FontSize="13"
+            TextColor="#FF8F00"
+            VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
 
             <!-- Inference info strip -->
             <Border Style="{StaticResource CardFrame}" Padding="14,10">

@@ -53,6 +53,17 @@ namespace PlantDoctor.Views
                 SeverityLabel.Text = $"Severity: {info.Severity}";
                 ConfidenceLabel.Text = $"{_result.Confidence * 100:F0}%";
 
+                // Show warning for moderate confidence
+                if (_result.Confidence < 0.75f)
+                {
+                    ConfidenceWarningBorder.IsVisible = true;
+                    ConfidenceWarningLabel.Text = $"Moderate confidence ({_result.Confidence * 100:F0}%) — consider retaking with better lighting";
+                }
+                else
+                {
+                    ConfidenceWarningBorder.IsVisible = false;
+                }
+
                 // Severity icon
                 SeverityIcon.Text = info.Severity switch
                 {
