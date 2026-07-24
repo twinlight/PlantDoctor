@@ -7,7 +7,16 @@ namespace PlantDoctor
         public App()
         {
             InitializeComponent();
-            Application.Current!.UserAppTheme = AppTheme.Light; // 👈 add this line
+            Application.Current!.UserAppTheme = AppTheme.Light;
+
+#if ANDROID
+            Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += (_, args) =>
+            {
+                System.Diagnostics.Debug.WriteLine($"[Android] Unhandled: {args.Exception}");
+                if (args.Exception.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine($"[Android] Inner: {args.Exception.InnerException}");
+            };
+#endif
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

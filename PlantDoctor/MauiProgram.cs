@@ -33,10 +33,7 @@ namespace PlantDoctor
 
             // Views
             builder.Services.AddTransient<HomePage>();
-            builder.Services.AddTransient<CapturePage>(sp => new CapturePage(
-                sp.GetRequiredService<InferenceCoordinator>(),
-                sp.GetRequiredService<DatabaseService>()
-            ));
+            builder.Services.AddTransient<CapturePage>();
             builder.Services.AddTransient<ResultPage>();
             builder.Services.AddTransient<HistoryPage>();
 

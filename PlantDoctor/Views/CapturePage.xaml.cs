@@ -1,3 +1,4 @@
+using PlantDoctor.Helpers;
 using PlantDoctor.Models;
 using PlantDoctor.Services;
 
@@ -6,14 +7,14 @@ namespace PlantDoctor.Views
     public partial class CapturePage : ContentPage
     {
         private string? _selectedImagePath;
-        private readonly InferenceCoordinator _coordinator;     // ← changed
+        private readonly InferenceCoordinator _coordinator;
         private readonly DatabaseService _databaseService;
 
-        public CapturePage(InferenceCoordinator coordinator, DatabaseService databaseService)
+        public CapturePage()
         {
             InitializeComponent();
-            _coordinator = coordinator;
-            _databaseService = databaseService;
+            _coordinator = ServiceHelper.GetRequiredService<InferenceCoordinator>();
+            _databaseService = ServiceHelper.GetRequiredService<DatabaseService>();
         }
 
         protected override void OnAppearing()
@@ -43,21 +44,46 @@ namespace PlantDoctor.Views
 
         private async void OnCameraTapped(object sender, EventArgs e)
         {
+            if (!await EnsureCameraPermissionAsync())
+                return;
+
             try
             {
-                var status = await Permissions.RequestAsync<Permissions.Camera>();
-                if (status != PermissionStatus.Granted)
+                var photo = await MediaPicker.Default.CapturePhotoAsync(new MediaPickerOptions
                 {
-                    await DisplayAlert("Permission Denied", "Camera permission is required.", "OK");
-                    return;
-                }
-                var photo = await MediaPicker.Default.CapturePhotoAsync();
-                if (photo != null) await LoadImageAsync(photo);
+                    Title = "Capture plant leaf"
+                });
+                if (photo != null)
+                    await LoadImageAsync(photo);
+            }
+            catch (FeatureNotSupportedException)
+            {
+                await DisplayAlert("Not Supported", "Camera is not available on this device.", "OK");
+            }
+            catch (PermissionException)
+            {
+                await DisplayAlert("Permission Denied", "Camera permission is required.", "OK");
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[CapturePage] Camera error: {ex}");
                 await DisplayAlert("Error", $"Could not open camera: {ex.Message}", "OK");
             }
+        }
+
+        private async Task<bool> EnsureCameraPermissionAsync()
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (status != PermissionStatus.Granted)
+                status = await Permissions.RequestAsync<Permissions.Camera>();
+
+            if (status != PermissionStatus.Granted)
+            {
+                await DisplayAlert("Permission Denied", "Camera permission is required.", "OK");
+                return false;
+            }
+
+            return true;
         }
 
         private async void OnGalleryTapped(object sender, EventArgs e)
@@ -75,7 +101,11 @@ namespace PlantDoctor.Views
 
         private async Task LoadImageAsync(FileResult photo)
         {
-            var localPath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
+            var extension = Path.GetExtension(photo.FileName);
+            if (string.IsNullOrEmpty(extension))
+                extension = ".jpg";
+
+            var localPath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid():N}{extension}");
             using (var stream = await photo.OpenReadAsync())
             using (var fileStream = File.OpenWrite(localPath))
                 await stream.CopyToAsync(fileStream);

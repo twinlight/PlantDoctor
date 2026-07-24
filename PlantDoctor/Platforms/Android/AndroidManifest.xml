@@ -4,7 +4,23 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.CAMERA" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
+
+	<!-- Required on Android 11+ so MediaPicker can launch camera/gallery intents -->
+	<queries>
+		<intent>
+			<action android:name="android.media.action.IMAGE_CAPTURE" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.PICK" />
+			<data android:mimeType="image/*" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.GET_CONTENT" />
+			<data android:mimeType="image/*" />
+		</intent>
+	</queries>
 </manifest>

@@ -1,15 +1,15 @@
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using PlantDoctor.Models;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 
 namespace PlantDoctor.Services
 {
-    public class OnnxInferenceService : IInferenceService   // ← was : InferenceCoordinator
+    public class OnnxInferenceService : IInferenceService, IDisposable
     {
+        private readonly object _initLock = new();
         private InferenceSession? _session;
-        private bool _isInitialized = false;
+        private bool _isInitialized;
 
         // Synchronized with class_labels.json from trained model
         // Order = alphabetical folder sort by image_dataset_from_directory
@@ -37,26 +37,52 @@ namespace PlantDoctor.Services
             if (_isInitialized) return;
 
             var modelPath = Path.Combine(FileSystem.AppDataDirectory, "plant_disease_model.onnx");
-
             if (!File.Exists(modelPath))
             {
-                using var stream = await FileSystem.OpenAppPackageFileAsync("plant_disease_model.onnx");
-                using var fileStream = File.Create(modelPath);
+                await using var stream = await FileSystem.OpenAppPackageFileAsync("plant_disease_model.onnx");
+                await using var fileStream = File.Create(modelPath);
                 await stream.CopyToAsync(fileStream);
             }
 
-            var options = new SessionOptions();
-            options.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
-            _session = new InferenceSession(modelPath, options);
-            _isInitialized = true;
+            await Task.Run(() =>
+            {
+                lock (_initLock)
+                {
+                    if (_isInitialized) return;
+
+                    _session?.Dispose();
+                    var options = new SessionOptions
+                    {
+                        GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
+                        InterOpNumThreads = 1,
+                        IntraOpNumThreads = 1
+                    };
+
+                    _session = new InferenceSession(modelPath, options);
+                    _isInitialized = true;
 
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine($"[ONNX] Model loaded from: {modelPath}");
-            System.Diagnostics.Debug.WriteLine($"[ONNX] Input: {string.Join(", ", _session.InputMetadata.Keys)}");
-            System.Diagnostics.Debug.WriteLine($"[ONNX] Output: {string.Join(", ", _session.OutputMetadata.Keys)}");
-            System.Diagnostics.Debug.WriteLine($"[ONNX] Input shape: [{string.Join(", ", _session.InputMetadata.First().Value.Dimensions)}]");
-            System.Diagnostics.Debug.WriteLine($"[ONNX] Output shape: [{string.Join(", ", _session.OutputMetadata.First().Value.Dimensions)}]");
+                    System.Diagnostics.Debug.WriteLine($"[ONNX] Model loaded from: {modelPath}");
+                    System.Diagnostics.Debug.WriteLine($"[ONNX] Input: {string.Join(", ", _session.InputMetadata.Keys)}");
+                    System.Diagnostics.Debug.WriteLine($"[ONNX] Output: {string.Join(", ", _session.OutputMetadata.Keys)}");
 #endif
+                }
+            });
+        }
+
+        private void ResetSession()
+        {
+            lock (_initLock)
+            {
+                _session?.Dispose();
+                _session = null;
+                _isInitialized = false;
+            }
+        }
+
+        public void Dispose()
+        {
+            ResetSession();
         }
 
         public async Task<PredictionResult> PredictAsync(string imagePath)
@@ -64,20 +90,28 @@ namespace PlantDoctor.Services
             await InitializeAsync();
 
             var stopwatch = Stopwatch.StartNew();
-
             var inputTensor = await PreprocessImageAsync(imagePath);
 
-            var inputs = new List<NamedOnnxValue>
-            {
-                NamedOnnxValue.CreateFromTensor(
-                    _session!.InputMetadata.Keys.First(),
-                    inputTensor)
-            };
-
             float[] outputScores;
-            using (var results = _session.Run(inputs))
+            try
             {
+                var inputs = new List<NamedOnnxValue>
+                {
+                    NamedOnnxValue.CreateFromTensor(
+                        _session!.InputMetadata.Keys.First(),
+                        inputTensor)
+                };
+
+                using var results = _session.Run(inputs);
                 outputScores = results.First().AsEnumerable<float>().ToArray();
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"[ONNX] Inference failed, resetting session: {ex}");
+#endif
+                ResetSession();
+                throw;
             }
 
 #if DEBUG
@@ -149,6 +183,9 @@ namespace PlantDoctor.Services
             }
 
             using var skBitmap = SkiaSharp.SKBitmap.Decode(imageBytes);
+            if (skBitmap == null)
+                throw new InvalidOperationException("Could not decode the selected image.");
+
             using var resized = skBitmap.Resize(
                 new SkiaSharp.SKImageInfo(width, height),
                 SkiaSharp.SKSamplingOptions.Default);
