@@ -1,10 +1,195 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
     x:Class="PlantDoctor.Views.HistoryPage"
+    x:Name="HistoryPageRoot"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="History">
-    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-        <Label Text="History Page — coming soon" FontSize="18" />
-    </VerticalStackLayout>
+    xmlns:models="clr-namespace:PlantDoctor.Models"
+    xmlns:vm="clr-namespace:PlantDoctor.ViewModels"
+    Title="History"
+    Shell.NavBarIsVisible="True">
+
+    <Shell.TitleView>
+        <Grid
+            BindingContext="{Binding Source={x:Reference HistoryPageRoot}, Path=BindingContext}"
+            ColumnDefinitions="*,Auto"
+            Padding="0,0,16,0">
+            <Label
+                Grid.Column="0"
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="Scan History"
+                TextColor="{StaticResource PrimaryGreenDark}"
+                VerticalOptions="Center" />
+            <Button
+                Grid.Column="1"
+                BackgroundColor="Transparent"
+                Command="{Binding ClearAllCommand}"
+                FontSize="12"
+                IsVisible="{Binding HasScans}"
+                Text="Clear All"
+                TextColor="{StaticResource AccentRed}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="*">
+
+        <!-- Loading indicator -->
+        <ActivityIndicator
+            Color="{StaticResource PrimaryGreen}"
+            HorizontalOptions="Center"
+            IsRunning="{Binding IsLoading}"
+            IsVisible="{Binding IsLoading}"
+            VerticalOptions="Center" />
+
+        <!-- Empty state -->
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            IsVisible="{Binding IsEmpty}"
+            Spacing="16"
+            VerticalOptions="Center">
+            <Border
+                BackgroundColor="#E8F5E9"
+                HeightRequest="90"
+                HorizontalOptions="Center"
+                StrokeThickness="0"
+                WidthRequest="90">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="45" />
+                </Border.StrokeShape>
+                <Label
+                    FontSize="40"
+                    HorizontalOptions="Center"
+                    Text="🌿"
+                    VerticalOptions="Center" />
+            </Border>
+            <Label
+                FontAttributes="Bold"
+                FontSize="18"
+                HorizontalOptions="Center"
+                Text="No scans yet"
+                TextColor="{StaticResource TextDark}" />
+            <Label
+                FontSize="14"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Text="Your plant disease scan history&#10;will appear here"
+                TextColor="{StaticResource TextMuted}" />
+            <Button
+                Command="{Binding ScanNowCommand}"
+                HorizontalOptions="Center"
+                Style="{StaticResource PrimaryButton}"
+                Text="📷  Scan a Plant" />
+        </VerticalStackLayout>
+
+        <!-- History list -->
+        <CollectionView
+            IsVisible="{Binding HasScans}"
+            ItemsSource="{Binding Scans}"
+            Margin="0"
+            SelectionMode="None">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout
+                    ItemSpacing="0"
+                    Orientation="Vertical" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ScanHistory">
+                    <SwipeView>
+
+                        <!-- Swipe to delete -->
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem
+                                    BackgroundColor="{StaticResource DangerRed}"
+                                    Command="{Binding Source={x:Reference HistoryPageRoot}, Path=BindingContext.DeleteScanCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Text="Delete" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <!-- Card content -->
+                        <Border
+                            Margin="16,6,16,6"
+                            Style="{StaticResource CardFrame}">
+                            <Grid ColumnDefinitions="6,*,Auto" ColumnSpacing="12">
+
+                                <!-- Severity colour bar -->
+                                <BoxView
+                                    Grid.Column="0"
+                                    CornerRadius="3"
+                                    HeightRequest="60"
+                                    VerticalOptions="Center"
+                                    Color="{Binding ColorHex}" />
+
+                                <!-- Info -->
+                                <VerticalStackLayout
+                                    Grid.Column="1"
+                                    Spacing="3"
+                                    VerticalOptions="Center">
+                                    <Label
+                                        FontAttributes="Bold"
+                                        FontSize="15"
+                                        Text="{Binding DisplayName}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextDark}, Dark=White}" />
+                                    <Label
+                                        FontSize="12"
+                                        Text="{Binding CropName}"
+                                        TextColor="{StaticResource TextMuted}" />
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Label
+                                            FontSize="11"
+                                            Text="{Binding Confidence, StringFormat='{0:P0} confidence'}"
+                                            TextColor="{StaticResource TextMuted}" />
+                                        <Label
+                                            FontSize="11"
+                                            Text="•"
+                                            TextColor="{StaticResource TextMuted}" />
+                                        <Label
+                                            FontSize="11"
+                                            Text="{Binding InferenceMode}"
+                                            TextColor="{StaticResource TextMuted}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <!-- Date + severity badge -->
+                                <VerticalStackLayout
+                                    Grid.Column="2"
+                                    HorizontalOptions="End"
+                                    Spacing="6"
+                                    VerticalOptions="Center">
+                                    <Label
+                                        FontSize="11"
+                                        HorizontalOptions="End"
+                                        Text="{Binding ScannedAt, StringFormat='{0:MMM dd}'}"
+                                        TextColor="{StaticResource TextMuted}" />
+                                    <Label
+                                        FontSize="11"
+                                        HorizontalOptions="End"
+                                        Text="{Binding ScannedAt, StringFormat='{0:HH:mm}'}"
+                                        TextColor="{StaticResource TextMuted}" />
+                                    <Border
+                                        BackgroundColor="{Binding ColorHex}"
+                                        Padding="6,3"
+                                        StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="6" />
+                                        </Border.StrokeShape>
+                                        <Label
+                                            FontAttributes="Bold"
+                                            FontSize="10"
+                                            Text="{Binding Severity}"
+                                            TextColor="White" />
+                                    </Border>
+                                </VerticalStackLayout>
+
+                            </Grid>
+                        </Border>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
 </ContentPage>

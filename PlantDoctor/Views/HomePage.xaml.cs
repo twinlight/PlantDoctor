@@ -14,8 +14,7 @@ namespace PlantDoctor.Views
 
         private async void OnHistoryTapped(object sender, EventArgs e)
         {
-            // Navigation to HistoryPage — wired up in Phase 4
-            await DisplayAlert("Coming Soon", "History page coming next!", "OK");
+            await Shell.Current.GoToAsync(nameof(HistoryPage));
         }
     }
 }

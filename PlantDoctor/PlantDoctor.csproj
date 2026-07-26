@@ -82,12 +82,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="ViewModels\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Compile Update="AppShell.xaml.cs">
 	    <DependentUpon>AppShell.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\HistoryPage.xaml.cs">
+	    <DependentUpon>HistoryPage.xaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Views\HomePage.xaml.cs">
 	    <DependentUpon>HomePage.xaml</DependentUpon>

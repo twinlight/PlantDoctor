@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using PlantDoctor.Services;
+using PlantDoctor.ViewModels;
 using PlantDoctor.Views;
 
 namespace PlantDoctor
@@ -30,6 +31,9 @@ namespace PlantDoctor
                 sp.GetRequiredService<ConnectivityService>(),
                 sp.GetRequiredService<DatabaseService>()
             ));
+
+            // ViewModels
+            builder.Services.AddTransient<HistoryViewModel>();
 
             // Views
             builder.Services.AddTransient<HomePage>();

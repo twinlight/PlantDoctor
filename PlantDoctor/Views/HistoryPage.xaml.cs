@@ -1,9 +1,23 @@
-namespace PlantDoctor.Views;
+using PlantDoctor.Helpers;
+using PlantDoctor.ViewModels;
 
-public partial class HistoryPage : ContentPage
+namespace PlantDoctor.Views
 {
-	public HistoryPage()
-	{
-		InitializeComponent();
-	}
+    public partial class HistoryPage : ContentPage
+    {
+        private readonly HistoryViewModel _viewModel;
+
+        public HistoryPage()
+        {
+            InitializeComponent();
+            _viewModel = ServiceHelper.GetRequiredService<HistoryViewModel>();
+            BindingContext = _viewModel;
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await _viewModel.LoadHistoryCommand.ExecuteAsync(null);
+        }
+    }
 }
