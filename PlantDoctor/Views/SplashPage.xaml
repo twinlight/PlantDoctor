@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="PlantDoctor.Views.SplashPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid>
+        <!-- Full screen gradient background -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0.3,1">
+                <GradientStop Color="#0A3D0A" Offset="0.0" />
+                <GradientStop Color="#1B5E20" Offset="0.4" />
+                <GradientStop Color="#2E7D32" Offset="0.75" />
+                <GradientStop Color="#388E3C" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Decorative circle top right -->
+        <Ellipse
+            Fill="#1A4CAF50"
+            HeightRequest="320"
+            HorizontalOptions="End"
+            Margin="0,-80,-80,0"
+            VerticalOptions="Start"
+            WidthRequest="320" />
+
+        <!-- Decorative circle bottom left -->
+        <Ellipse
+            Fill="#1243A047"
+            HeightRequest="250"
+            HorizontalOptions="Start"
+            Margin="-60,0,0,-60"
+            VerticalOptions="End"
+            WidthRequest="250" />
+
+        <!-- Main content -->
+        <VerticalStackLayout
+            Padding="36,0"
+            Spacing="0"
+            VerticalOptions="Center">
+
+            <!-- App icon container -->
+            <Border
+                BackgroundColor="#22FFFFFF"
+                HeightRequest="110"
+                HorizontalOptions="Center"
+                Margin="0,0,0,32"
+                StrokeThickness="0"
+                WidthRequest="110">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30" />
+                </Border.StrokeShape>
+                <Label
+                    FontSize="54"
+                    HorizontalOptions="Center"
+                    Text="🌿"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <!-- App name -->
+            <Label
+                FontAttributes="Bold"
+                FontSize="42"
+                HorizontalOptions="Center"
+                Margin="0,0,0,10"
+                Text="PlantDoctor"
+                TextColor="White" />
+
+            <!-- Tagline -->
+            <Label
+                FontSize="16"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Margin="0,0,0,60"
+                Opacity="0.85"
+                Text="AI-powered plant disease detection&#10;Works offline. Always ready."
+                TextColor="White" />
+
+            <!-- Stats row -->
+            <Grid
+                ColumnDefinitions="*,*,*"
+                ColumnSpacing="1"
+                Margin="0,0,0,60">
+
+                <VerticalStackLayout
+                    Grid.Column="0"
+                    HorizontalOptions="Center"
+                    Spacing="4">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="26"
+                        HorizontalOptions="Center"
+                        Text="15"
+                        TextColor="White" />
+                    <Label
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Opacity="0.75"
+                        Text="Diseases"
+                        TextColor="White" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Grid.Column="1"
+                    HorizontalOptions="Center"
+                    Spacing="4">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="26"
+                        HorizontalOptions="Center"
+                        Text="93%"
+                        TextColor="White" />
+                    <Label
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Opacity="0.75"
+                        Text="Accuracy"
+                        TextColor="White" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout
+                    Grid.Column="2"
+                    HorizontalOptions="Center"
+                    Spacing="4">
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="26"
+                        HorizontalOptions="Center"
+                        Text="3"
+                        TextColor="White" />
+                    <Label
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Opacity="0.75"
+                        Text="Crops"
+                        TextColor="White" />
+                </VerticalStackLayout>
+
+            </Grid>
+
+            <!-- Get Started button -->
+            <Button
+                x:Name="GetStartedButton"
+                BackgroundColor="White"
+                Clicked="OnGetStartedTapped"
+                CornerRadius="16"
+                FontAttributes="Bold"
+                FontSize="17"
+                HeightRequest="58"
+                HorizontalOptions="Fill"
+                Margin="0,0,0,16"
+                Text="Get Started →"
+                TextColor="{StaticResource PrimaryGreenDark}" />
+
+            <!-- Supported crops pill -->
+            <Border
+                BackgroundColor="#22FFFFFF"
+                HorizontalOptions="Center"
+                Padding="16,8"
+                StrokeThickness="0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20" />
+                </Border.StrokeShape>
+                <Label
+                    FontSize="13"
+                    HorizontalOptions="Center"
+                    Opacity="0.9"
+                    Text="🍅 Tomato  •  🥔 Potato  •  🫑 Pepper Bell"
+                    TextColor="White" />
+            </Border>
+
+        </VerticalStackLayout>
+
+        <!-- Bottom tagline -->
+        <Label
+            FontSize="11"
+            HorizontalOptions="Center"
+            Margin="0,0,0,24"
+            Opacity="0.5"
+            Text="Everest Engineering College • BIT 2026"
+            TextColor="White"
+            VerticalOptions="End" />
+
+    </Grid>
+</ContentPage>

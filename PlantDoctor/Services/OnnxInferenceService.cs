@@ -85,6 +85,12 @@ namespace PlantDoctor.Services
             ResetSession();
         }
 
+        public async Task WarmUpAsync()
+        {
+            // Triggers model initialization without running a full prediction
+            await InitializeAsync();
+        }
+
         public async Task<PredictionResult> PredictAsync(string imagePath)
         {
             await InitializeAsync();

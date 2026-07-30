@@ -32,6 +32,12 @@ namespace PlantDoctor
                 sp.GetRequiredService<DatabaseService>()
             ));
 
+            builder.Services.AddTransient<SplashPage>();
+            builder.Services.AddTransient<LoadingPage>(sp => new LoadingPage(
+                sp.GetRequiredService<OnnxInferenceService>(),
+                sp.GetRequiredService<DatabaseService>()
+            ));
+
             // ViewModels
             builder.Services.AddTransient<HistoryViewModel>();
 

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="PlantDoctor.Views.LoadingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0.3,1">
+                <GradientStop Color="#0A3D0A" Offset="0.0" />
+                <GradientStop Color="#1B5E20" Offset="0.5" />
+                <GradientStop Color="#2E7D32" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            Spacing="24"
+            VerticalOptions="Center">
+
+            <!-- Icon -->
+            <Border
+                BackgroundColor="#22FFFFFF"
+                HeightRequest="90"
+                HorizontalOptions="Center"
+                StrokeThickness="0"
+                WidthRequest="90">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24" />
+                </Border.StrokeShape>
+                <Label
+                    FontSize="42"
+                    HorizontalOptions="Center"
+                    Text="🌿"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <Label
+                FontAttributes="Bold"
+                FontSize="28"
+                HorizontalOptions="Center"
+                Text="PlantDoctor"
+                TextColor="White" />
+
+            <!-- Loading indicator -->
+            <ActivityIndicator
+                Color="White"
+                HorizontalOptions="Center"
+                IsRunning="True"
+                HeightRequest="36"
+                WidthRequest="36" />
+
+            <!-- Status message -->
+            <Label
+                x:Name="StatusLabel"
+                FontSize="14"
+                HorizontalOptions="Center"
+                Opacity="0.8"
+                Text="Initializing AI model..."
+                TextColor="White" />
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

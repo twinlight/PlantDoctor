@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using PlantDoctor.Views;
 
 namespace PlantDoctor
 {
@@ -8,20 +8,11 @@ namespace PlantDoctor
         {
             InitializeComponent();
             Application.Current!.UserAppTheme = AppTheme.Light;
-
-#if ANDROID
-            Android.Runtime.AndroidEnvironment.UnhandledExceptionRaiser += (_, args) =>
-            {
-                System.Diagnostics.Debug.WriteLine($"[Android] Unhandled: {args.Exception}");
-                if (args.Exception.InnerException != null)
-                    System.Diagnostics.Debug.WriteLine($"[Android] Inner: {args.Exception.InnerException}");
-            };
-#endif
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            return new Window(new SplashPage());
         }
     }
 }
