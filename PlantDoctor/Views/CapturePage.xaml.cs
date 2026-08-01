@@ -143,7 +143,7 @@ namespace PlantDoctor.Views
                 var result = await _coordinator.PredictAsync(_selectedImagePath);
 
                 // Confidence threshold
-                if (result.Confidence < 0.55f)
+                if (result.Confidence < 0.6f)
                 {
                     await DisplayAlert(
                         "📷 Cannot Identify",
